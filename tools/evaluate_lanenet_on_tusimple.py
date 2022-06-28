@@ -13,12 +13,15 @@ import glob
 import os
 import os.path as ops
 import time
+import sys
 
+import sklearn
 import cv2
 import numpy as np
 import tensorflow as tf
 import tqdm
 
+sys.path.append('/home/yvxaiver/lanenet-lane-detection')
 from lanenet_model import lanenet
 from lanenet_model import lanenet_postprocess
 from local_utils.config_utils import parse_config_utils

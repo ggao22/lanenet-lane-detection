@@ -390,8 +390,11 @@ class LaneNetPostProcessor(object):
                 lane_pts.append([src_x, src_y])
 
             src_lane_pts.append(lane_pts)
-
+                
+        
         # tusimple test data sample point along y axis every 10 pixels
+        full_lane_pts = []
+        source_image_height = source_image.shape[0]
         source_image_width = source_image.shape[1]
         for index, single_lane_pts in enumerate(src_lane_pts):
             single_lane_pt_x = np.array(single_lane_pts, dtype=np.float32)[:, 0]
@@ -402,6 +405,9 @@ class LaneNetPostProcessor(object):
             else:
                 raise ValueError('Wrong data source now only support tusimple')
             step = int(math.floor((end_plot_y - start_plot_y) / 10))
+            
+            final_single_lane_pts = []
+            
             for plot_y in np.linspace(start_plot_y, end_plot_y, step):
                 diff = single_lane_pt_y - plot_y
                 fake_diff_bigger_than_zero = diff.copy()
@@ -428,12 +434,19 @@ class LaneNetPostProcessor(object):
                                           abs(last_src_pt_y - plot_y) * last_src_pt_y) / \
                                          (abs(previous_src_pt_y - plot_y) + abs(last_src_pt_y - plot_y))
 
-                if interpolation_src_pt_x > source_image_width or interpolation_src_pt_x < 10:
+                if interpolation_src_pt_x > source_image_width or interpolation_src_pt_x < 10 or \
+                        interpolation_src_pt_y > source_image_height or interpolation_src_pt_y < 0:
                     continue
 
                 lane_color = self._color_map[index].tolist()
                 cv2.circle(source_image, (int(interpolation_src_pt_x),
                                           int(interpolation_src_pt_y)), 5, lane_color, -1)
+                                          
+                final_single_lane_pts.append([int(interpolation_src_pt_x),int(interpolation_src_pt_y)])
+                
+            full_lane_pts.append(np.array(final_single_lane_pts))
+
+            
         ret = {
             'mask_image': mask_image,
             'fit_params': fit_params,

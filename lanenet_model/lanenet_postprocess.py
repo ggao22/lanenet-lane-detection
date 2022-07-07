@@ -437,7 +437,12 @@ class LaneNetPostProcessor(object):
                 if interpolation_src_pt_x > source_image_width or interpolation_src_pt_x < 10 or \
                         interpolation_src_pt_y > source_image_height or interpolation_src_pt_y < 0:
                     continue
+                
 
+                lane_color = self._color_map[index].tolist()
+                cv2.circle(source_image, (int(interpolation_src_pt_x),
+                                          int(interpolation_src_pt_y)), 5, lane_color, -1)
+                                          
                 final_single_lane_pts.append([int(interpolation_src_pt_x),int(interpolation_src_pt_y)])
                 
             full_lane_pts.append(np.array(final_single_lane_pts))
@@ -572,10 +577,6 @@ class LaneNetPostProcessor(object):
                 if interpolation_src_pt_x > source_image_width or interpolation_src_pt_x < 10 or \
                         interpolation_src_pt_y > source_image_height or interpolation_src_pt_y < 0:
                     continue
-
-                lane_color = self._color_map[index].tolist()
-                cv2.circle(source_image, (int(interpolation_src_pt_x),
-                                          int(interpolation_src_pt_y)), 5, lane_color, -1)
                                           
                 final_single_lane_pts.append([int(interpolation_src_pt_x),int(interpolation_src_pt_y)])
                 

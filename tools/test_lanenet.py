@@ -117,7 +117,7 @@ def test_lanenet(image_path, weights_path, with_lane_fit=True):
         saver.restore(sess=sess, save_path=weights_path)
 
         t_start = time.time()
-        loop_times = 500
+        loop_times = 1
         for i in range(loop_times):
             binary_seg_image, instance_seg_image = sess.run(
                 [binary_seg_ret, instance_seg_ret],

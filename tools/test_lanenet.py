@@ -116,44 +116,44 @@ def test_lanenet(image_path, weights_path, with_lane_fit=True):
     with sess.as_default():
         saver.restore(sess=sess, save_path=weights_path)
 
-        t_start = time.time()
-        loop_times = 1
-        for i in range(loop_times):
-            binary_seg_image, instance_seg_image = sess.run(
-                [binary_seg_ret, instance_seg_ret],
-                feed_dict={input_tensor: [image]}
-            )
-        t_cost = time.time() - t_start
-        t_cost /= loop_times
-        LOG.info('Single image inference cost time: {:.5f}s'.format(t_cost))
-
-        postprocess_result = postprocessor.postprocess(
-            binary_seg_result=binary_seg_image[0],
-            instance_seg_result=instance_seg_image[0],
-            source_image=image_vis,
-            with_lane_fit=with_lane_fit,
-            data_source='tusimple'
+    t_start = time.time()
+    loop_times = 1
+    for i in range(loop_times):
+        binary_seg_image, instance_seg_image = sess.run(
+            [binary_seg_ret, instance_seg_ret],
+            feed_dict={input_tensor: [image]}
         )
-        mask_image = postprocess_result['mask_image']
-        if with_lane_fit:
-            lane_params = postprocess_result['fit_params']
-            LOG.info('Model have fitted {:d} lanes'.format(len(lane_params)))
-            for i in range(len(lane_params)):
-                LOG.info('Fitted 2-order lane {:d} curve param: {}'.format(i + 1, lane_params[i]))
+    t_cost = time.time() - t_start
+    t_cost /= loop_times
+    LOG.info('Single image inference cost time: {:.5f}s'.format(t_cost))
 
-        for i in range(CFG.MODEL.EMBEDDING_FEATS_DIMS):
-            instance_seg_image[0][:, :, i] = minmax_scale(instance_seg_image[0][:, :, i])
-        embedding_image = np.array(instance_seg_image[0], np.uint8)
+    postprocess_result = postprocessor.postprocess(
+        binary_seg_result=binary_seg_image[0],
+        instance_seg_result=instance_seg_image[0],
+        source_image=image_vis,
+        with_lane_fit=with_lane_fit,
+        data_source='tusimple'
+    )
+    mask_image = postprocess_result['mask_image']
+    if with_lane_fit:
+        lane_params = postprocess_result['fit_params']
+        LOG.info('Model have fitted {:d} lanes'.format(len(lane_params)))
+        for i in range(len(lane_params)):
+            LOG.info('Fitted 2-order lane {:d} curve param: {}'.format(i + 1, lane_params[i]))
 
-        plt.figure('mask_image')
-        plt.imshow(mask_image[:, :, (2, 1, 0)])
-        plt.figure('src_image')
-        plt.imshow(image_vis[:, :, (2, 1, 0)])
-        plt.figure('instance_image')
-        plt.imshow(embedding_image[:, :, (2, 1, 0)])
-        plt.figure('binary_image')
-        plt.imshow(binary_seg_image[0] * 255, cmap='gray')
-        plt.show()
+    for i in range(CFG.MODEL.EMBEDDING_FEATS_DIMS):
+        instance_seg_image[0][:, :, i] = minmax_scale(instance_seg_image[0][:, :, i])
+    embedding_image = np.array(instance_seg_image[0], np.uint8)
+
+    plt.figure('mask_image')
+    plt.imshow(mask_image[:, :, (2, 1, 0)])
+    plt.figure('src_image')
+    plt.imshow(image_vis[:, :, (2, 1, 0)])
+    plt.figure('instance_image')
+    plt.imshow(embedding_image[:, :, (2, 1, 0)])
+    plt.figure('binary_image')
+    plt.imshow(binary_seg_image[0] * 255, cmap='gray')
+    plt.show()
 
     sess.close()
 

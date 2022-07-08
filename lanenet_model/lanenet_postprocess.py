@@ -255,7 +255,7 @@ class LaneNetPostProcessor(object):
     """
     lanenet post process for lane generation
     """
-    def __init__(self, cfg, ipm_remap_file_path='./data/tusimple_ipm_remap.yml'):
+    def __init__(self, cfg, ipm_remap_file_path='/home/yvxaiver/lanenet-lane-detection/data/tusimple_ipm_remap.yml'):
         """
 
         :param ipm_remap_file_path: ipm generate file path
@@ -442,7 +442,7 @@ class LaneNetPostProcessor(object):
                 lane_color = self._color_map[index].tolist()
                 cv2.circle(source_image, (int(interpolation_src_pt_x),
                                           int(interpolation_src_pt_y)), 5, lane_color, -1)
-                                          
+
                 final_single_lane_pts.append([int(interpolation_src_pt_x),int(interpolation_src_pt_y)])
                 
             full_lane_pts.append(np.array(final_single_lane_pts))

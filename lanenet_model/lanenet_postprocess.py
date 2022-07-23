@@ -448,6 +448,9 @@ class LaneNetPostProcessor(object):
             full_lane_pts.append(np.array(final_single_lane_pts))
 
             
+        print(full_lane_pts)
+
+
         ret = {
             'mask_image': mask_image,
             'fit_params': fit_params,

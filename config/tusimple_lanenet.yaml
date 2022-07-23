@@ -1,6 +1,6 @@
 AUG:
     RESIZE_METHOD: 'stepscaling' # choice unpadding rangescaling and stepscaling
-    FIX_RESIZE_SIZE: [720, 720] # (width, height), for unpadding
+    FIX_RESIZE_SIZE: [1280, 720] # (width, height), for unpadding
     INF_RESIZE_VALUE: 500  # for rangescaling
     MAX_RESIZE_VALUE: 600  # for rangescaling
     MIN_RESIZE_VALUE: 400  # for rangescaling
@@ -24,12 +24,12 @@ AUG:
         CONTRAST_JITTER_RATIO: 0.5
         SATURATION_JITTER_RATIO: 0.5
 DATASET:
-    DATA_DIR: 'REPO_ROOT_PATH/data/training_data_example/'
+    DATA_DIR: '/home/yvxaiver/minicity_training_data/'
     IMAGE_TYPE: 'rgb'  # choice rgb or rgba
     NUM_CLASSES: 2
-    TEST_FILE_LIST: 'REPO_ROOT_PATH/data/training_data_example/test.txt'
-    TRAIN_FILE_LIST: 'REPO_ROOT_PATH/data/training_data_example/train.txt'
-    VAL_FILE_LIST: 'REPO_ROOT_PATH/data/training_data_example/val.txt'
+    TEST_FILE_LIST: '/home/yvxaiver/minicity_training_data/test.txt'
+    TRAIN_FILE_LIST: '/home/yvxaiver/minicity_training_data/train.txt'
+    VAL_FILE_LIST: '/home/yvxaiver/minicity_training_data/val.txt'
     IGNORE_INDEX: 255
     PADDING_VALUE: [127.5, 127.5, 127.5]
     MEAN_VALUE: [0.5, 0.5, 0.5]
@@ -53,8 +53,8 @@ TRAIN:
     TBOARD_SAVE_DIR: 'tboard/tusimple/'
     MODEL_PARAMS_CONFIG_FILE_NAME: "model_train_config.json"
     RESTORE_FROM_SNAPSHOT:
-        ENABLE: False
-        SNAPSHOT_PATH: ''
+        ENABLE: True
+        SNAPSHOT_PATH: "/home/yvxaiver/lanenet-lane-detection/weights/tusimple_lanenet.ckpt"
     SNAPSHOT_EPOCH: 8
     BATCH_SIZE: 32
     VAL_BATCH_SIZE: 4

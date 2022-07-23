@@ -1,0 +1,12 @@
+2022-07-20T14:59:48.969215-0500 INFO Start generating training example tfrecords
+2022-07-20T14:59:48.972392-0500 INFO Writing /home/yvxaiver/minicity_training_data/tfrecords/tusimple_train.tfrecords....
+2022-07-20T14:59:54.323853-0500 INFO Writing /home/yvxaiver/minicity_training_data/tfrecords/tusimple_train.tfrecords complete
+2022-07-20T14:59:54.328913-0500 INFO Generating training example tfrecords complete
+2022-07-20T14:59:54.329775-0500 INFO Start generating validation example tfrecords
+2022-07-20T14:59:54.333641-0500 INFO Writing /home/yvxaiver/minicity_training_data/tfrecords/tusimple_val.tfrecords....
+2022-07-20T14:59:55.931919-0500 INFO Writing /home/yvxaiver/minicity_training_data/tfrecords/tusimple_val.tfrecords complete
+2022-07-20T14:59:55.935247-0500 INFO Generating validation example tfrecords complete
+2022-07-20T14:59:55.935852-0500 INFO Start generating testing example tfrecords
+2022-07-20T14:59:55.939722-0500 INFO Writing /home/yvxaiver/minicity_training_data/tfrecords/tusimple_test.tfrecords....
+2022-07-20T14:59:57.526963-0500 INFO Writing /home/yvxaiver/minicity_training_data/tfrecords/tusimple_test.tfrecords complete
+2022-07-20T14:59:57.530563-0500 INFO Generating testing example tfrecords complete

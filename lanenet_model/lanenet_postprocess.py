@@ -332,8 +332,6 @@ class LaneNetPostProcessor(object):
             instance_seg_result=instance_seg_result
         )
 
-        cv2.imshow('mask_image', mask_image)
-
         if mask_image is None:
             return {
                 'mask_image': None,
@@ -362,31 +360,30 @@ class LaneNetPostProcessor(object):
                 tmp_mask[tuple((np.int_(coords[:, 1] * 720 / 256), np.int_(coords[:, 0] * 1280 / 512)))] = 255
             else:
                 raise ValueError('Wrong data source now only support tusimple')
-            tmp_ipm_mask = cv2.remap(
-                tmp_mask,
-                self._remap_to_ipm_x,
-                self._remap_to_ipm_y,
-                interpolation=cv2.INTER_NEAREST
-            )
-            nonzero_y = np.array(tmp_ipm_mask.nonzero()[0])
-            nonzero_x = np.array(tmp_ipm_mask.nonzero()[1])
+            # tmp_ipm_mask = cv2.remap(
+            #     tmp_mask,
+            #     self._remap_to_ipm_x,
+            #     self._remap_to_ipm_y,
+            #     interpolation=cv2.INTER_NEAREST
+            # )
+            nonzero_y = np.array(tmp_mask.nonzero()[0])
+            nonzero_x = np.array(tmp_mask.nonzero()[1])
 
             fit_param = np.polyfit(nonzero_y, nonzero_x, 2)
             fit_params.append(fit_param)
 
-            [ipm_image_height, ipm_image_width] = tmp_ipm_mask.shape
-            plot_y = np.linspace(10, ipm_image_height, ipm_image_height - 10)
+            [tmp_mask_height, tmp_mask_width] = tmp_mask.shape
+            plot_y = np.linspace(10, tmp_mask_height, tmp_mask_width - 10)
             fit_x = fit_param[0] * plot_y ** 2 + fit_param[1] * plot_y + fit_param[2]
-            # fit_x = fit_param[0] * plot_y ** 3 + fit_param[1] * plot_y ** 2 + fit_param[2] * plot_y + fit_param[3]
 
             lane_pts = []
             for index in range(0, plot_y.shape[0], 5):
                 src_x = self._remap_to_ipm_x[
-                    int(plot_y[index]), int(np.clip(fit_x[index], 0, ipm_image_width - 1))]
+                    int(plot_y[index]), int(np.clip(fit_x[index], 0, tmp_mask_width - 1))]
                 if src_x <= 0:
                     continue
                 src_y = self._remap_to_ipm_y[
-                    int(plot_y[index]), int(np.clip(fit_x[index], 0, ipm_image_width - 1))]
+                    int(plot_y[index]), int(np.clip(fit_x[index], 0, tmp_mask_width - 1))]
                 src_y = src_y if src_y > 0 else 0
 
                 lane_pts.append([src_x, src_y])

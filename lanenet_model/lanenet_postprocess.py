@@ -332,6 +332,8 @@ class LaneNetPostProcessor(object):
             instance_seg_result=instance_seg_result
         )
 
+        cv2.imshow('mask_image', mask_image)
+
         if mask_image is None:
             return {
                 'mask_image': None,

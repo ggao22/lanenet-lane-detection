@@ -377,13 +377,22 @@ class LaneNetPostProcessor(object):
             fit_x = fit_param[0] * plot_y ** 2 + fit_param[1] * plot_y + fit_param[2]
 
             lane_pts = []
+            # for index in range(0, plot_y.shape[0], 5):
+            #     src_x = self._remap_to_ipm_x[
+            #         int(plot_y[index]), int(np.clip(fit_x[index], 0, tmp_mask_width - 1))]
+            #     if src_x <= 0:
+            #         continue
+            #     src_y = self._remap_to_ipm_y[
+            #         int(plot_y[index]), int(np.clip(fit_x[index], 0, tmp_mask_width - 1))]
+            #     src_y = src_y if src_y > 0 else 0
+
+            #     lane_pts.append([src_x, src_y])
+
             for index in range(0, plot_y.shape[0], 5):
-                src_x = self._remap_to_ipm_x[
-                    int(plot_y[index]), int(np.clip(fit_x[index], 0, tmp_mask_width - 1))]
+                src_x = int(np.clip(fit_x[index], 0, tmp_mask_width - 1))
                 if src_x <= 0:
                     continue
-                src_y = self._remap_to_ipm_y[
-                    int(plot_y[index]), int(np.clip(fit_x[index], 0, tmp_mask_width - 1))]
+                src_y = int(plot_y[index])
                 src_y = src_y if src_y > 0 else 0
 
                 lane_pts.append([src_x, src_y])

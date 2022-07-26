@@ -360,16 +360,13 @@ class LaneNetPostProcessor(object):
         for lane in lane_coords:
             coord_x = np.int_(lane[:,0] * source_image_width / 512)
             coord_y = np.int_(lane[:,1] * source_image_height / 256)
-            # plt.scatter(coord_x,coord_y, marker=r'$\clubsuit$')
             
             fit_param = np.polyfit(coord_y, coord_x,deg=8)
             fit_params.append(fit_param)
             
             spl = np.poly1d(fit_param)
             dy = np.linspace(min(coord_y), max(coord_y), 50)
-            # plt.scatter(spl(dy), dy)
             fitted_lane_coords.append(np.dstack((np.int_(spl(dy)), np.int_(dy))).reshape(len(dy),2))
-        # plt.show()
 
         full_lane_pts = []
         for i in range(len(fitted_lane_coords)):
@@ -438,16 +435,13 @@ class LaneNetPostProcessor(object):
         for lane in lane_coords:
             coord_x = np.int_(lane[:,0] * source_image_width / 512)
             coord_y = np.int_(lane[:,1] * source_image_height / 256)
-            # plt.scatter(coord_x,coord_y, marker=r'$\clubsuit$')
             
             fit_param = np.polyfit(coord_y, coord_x,deg=8)
             fit_params.append(fit_param)
             
             spl = np.poly1d(fit_param)
             dy = np.linspace(min(coord_y), max(coord_y), 50)
-            # plt.scatter(spl(dy), dy)
             fitted_lane_coords.append(np.dstack((np.int_(spl(dy)), np.int_(dy))).reshape(len(dy),2))
-        # plt.show()
 
         full_lane_pts = []
         for i in range(len(fitted_lane_coords)):

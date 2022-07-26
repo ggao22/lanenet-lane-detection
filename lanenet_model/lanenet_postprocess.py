@@ -355,7 +355,6 @@ class LaneNetPostProcessor(object):
         source_image_width = source_image.shape[1]
         source_image_height = source_image.shape[0]
 
-
         fitted_lane_coords = []
         fit_params = []
         for lane in lane_coords:
@@ -386,9 +385,6 @@ class LaneNetPostProcessor(object):
                 final_single_lane_pts.append([pts[0],pts[1]])
                 
             full_lane_pts.append(np.array(final_single_lane_pts))
-
-        print(full_lane_pts)
-
 
         ret = {
             'mask_image': mask_image,
@@ -434,95 +430,38 @@ class LaneNetPostProcessor(object):
         if mask_image is None:
             return None
 
-        # lane line fit
-        fit_params = []
-        src_lane_pts = []  # lane pts every single lane
-        for lane_index, coords in enumerate(lane_coords):
-            if data_source == 'tusimple':
-                tmp_mask = np.zeros(shape=(720, 1280), dtype=np.uint8)
-                tmp_mask[tuple((np.int_(coords[:, 1] * 720 / 256), np.int_(coords[:, 0] * 1280 / 512)))] = 255
-            else: # TODO: adding more data source
-                raise ValueError('Wrong data source now only support tusimple')
-            tmp_ipm_mask = cv2.remap(
-                tmp_mask,
-                self._remap_to_ipm_x,
-                self._remap_to_ipm_y,
-                interpolation=cv2.INTER_NEAREST
-            )
-            nonzero_y = np.array(tmp_ipm_mask.nonzero()[0])
-            nonzero_x = np.array(tmp_ipm_mask.nonzero()[1])
-
-            fit_param = np.polyfit(nonzero_y, nonzero_x, 2)
-            fit_params.append(fit_param)
-
-            [ipm_image_height, ipm_image_width] = tmp_ipm_mask.shape
-            plot_y = np.linspace(10, ipm_image_height, ipm_image_height - 10)
-            fit_x = fit_param[0] * plot_y ** 2 + fit_param[1] * plot_y + fit_param[2]
-
-            lane_pts = []
-            for index in range(0, plot_y.shape[0], 5):
-                src_x = self._remap_to_ipm_x[
-                    int(plot_y[index]), int(np.clip(fit_x[index], 0, ipm_image_width - 1))]
-                if src_x <= 0:
-                    continue
-                src_y = self._remap_to_ipm_y[
-                    int(plot_y[index]), int(np.clip(fit_x[index], 0, ipm_image_width - 1))]
-                src_y = src_y if src_y > 0 else 0
-
-                lane_pts.append([src_x, src_y])
-
-            src_lane_pts.append(lane_pts)
-                
-        
-        # tusimple test data sample point along y axis every 10 pixels
-        full_lane_pts = []
-        source_image_height = source_image.shape[0]
         source_image_width = source_image.shape[1]
-        for index, single_lane_pts in enumerate(src_lane_pts):
-            single_lane_pt_x = np.array(single_lane_pts, dtype=np.float32)[:, 0]
-            single_lane_pt_y = np.array(single_lane_pts, dtype=np.float32)[:, 1]
-            if data_source == 'tusimple':
-                start_plot_y = 240
-                end_plot_y = 720
-            else:
-                raise ValueError('Wrong data source now only support tusimple')
-            step = int(math.floor((end_plot_y - start_plot_y) / 10))
+        source_image_height = source_image.shape[0]
+
+        fitted_lane_coords = []
+        fit_params = []
+        for lane in lane_coords:
+            coord_x = np.int_(lane[:,0] * source_image_width / 512)
+            coord_y = np.int_(lane[:,1] * source_image_height / 256)
+            # plt.scatter(coord_x,coord_y, marker=r'$\clubsuit$')
             
+            fit_param = np.polyfit(coord_y, coord_x,deg=8)
+            fit_params.append(fit_param)
+            
+            spl = np.poly1d(fit_param)
+            dy = np.linspace(min(coord_y), max(coord_y), 50)
+            # plt.scatter(spl(dy), dy)
+            fitted_lane_coords.append(np.dstack((np.int_(spl(dy)), np.int_(dy))).reshape(len(dy),2))
+        # plt.show()
+
+        full_lane_pts = []
+        for i in range(len(fitted_lane_coords)):
             final_single_lane_pts = []
-            
-            for plot_y in np.linspace(start_plot_y, end_plot_y, step):
-                diff = single_lane_pt_y - plot_y
-                fake_diff_bigger_than_zero = diff.copy()
-                fake_diff_smaller_than_zero = diff.copy()
-                fake_diff_bigger_than_zero[np.where(diff <= 0)] = float('inf')
-                fake_diff_smaller_than_zero[np.where(diff > 0)] = float('-inf')
-                idx_low = np.argmax(fake_diff_smaller_than_zero)
-                idx_high = np.argmin(fake_diff_bigger_than_zero)
-
-                previous_src_pt_x = single_lane_pt_x[idx_low]
-                previous_src_pt_y = single_lane_pt_y[idx_low]
-                last_src_pt_x = single_lane_pt_x[idx_high]
-                last_src_pt_y = single_lane_pt_y[idx_high]
-
-                if previous_src_pt_y < start_plot_y or last_src_pt_y < start_plot_y or \
-                        fake_diff_smaller_than_zero[idx_low] == float('-inf') or \
-                        fake_diff_bigger_than_zero[idx_high] == float('inf'):
+            for pts in fitted_lane_coords[i]:
+                if pts[0] > source_image_width or pts[0] < 10 or \
+                        pts[1] > source_image_height or pts[1] < 0:
                     continue
+                lane_color = self._color_map[i].tolist()
+                cv2.circle(source_image, (pts[0],
+                                          pts[1]), 5, lane_color, -1)
 
-                interpolation_src_pt_x = (abs(previous_src_pt_y - plot_y) * previous_src_pt_x +
-                                          abs(last_src_pt_y - plot_y) * last_src_pt_x) / \
-                                         (abs(previous_src_pt_y - plot_y) + abs(last_src_pt_y - plot_y))
-                interpolation_src_pt_y = (abs(previous_src_pt_y - plot_y) * previous_src_pt_y +
-                                          abs(last_src_pt_y - plot_y) * last_src_pt_y) / \
-                                         (abs(previous_src_pt_y - plot_y) + abs(last_src_pt_y - plot_y))
-
-                if interpolation_src_pt_x > source_image_width or interpolation_src_pt_x < 10 or \
-                        interpolation_src_pt_y > source_image_height or interpolation_src_pt_y < 0:
-                    continue
-                                          
-                final_single_lane_pts.append([int(interpolation_src_pt_x),int(interpolation_src_pt_y)])
+                final_single_lane_pts.append([pts[0],pts[1]])
                 
             full_lane_pts.append(np.array(final_single_lane_pts))
 
-        
         return full_lane_pts

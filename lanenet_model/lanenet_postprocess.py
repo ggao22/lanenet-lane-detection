@@ -369,19 +369,17 @@ class LaneNetPostProcessor(object):
             spl = np.poly1d(fit_param)
             dy = np.linspace(min(coord_y), max(coord_y), 50)
             # plt.scatter(spl(dy), dy)
-            fitted_lane_coords.append(np.dstack((np.int_(spl(dy)), np.int_(dy))))
+            fitted_lane_coords.append(np.dstack((np.int_(spl(dy)), np.int_(dy))).reshape(len(dy),2))
         # plt.show()
 
-        print(fitted_lane_coords)
-
         full_lane_pts = []
-        for lane in fitted_lane_coords:
+        for i in range(len(fitted_lane_coords)):
             final_single_lane_pts = []
-            for pts in lane:
+            for pts in fitted_lane_coords[i]:
                 if pts[0] > source_image_width or pts[0] < 10 or \
                         pts[1] > source_image_height or pts[1] < 0:
                     continue
-                lane_color = self._color_map[index].tolist()
+                lane_color = self._color_map[i].tolist()
                 cv2.circle(source_image, (pts[0],
                                           pts[1]), 5, lane_color, -1)
 
@@ -389,7 +387,6 @@ class LaneNetPostProcessor(object):
                 
             full_lane_pts.append(np.array(final_single_lane_pts))
 
-            
         print(full_lane_pts)
 
 

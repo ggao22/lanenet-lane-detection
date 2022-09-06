@@ -102,3 +102,4 @@ class LaneNet(cnn_basenet.CNNBaseModel):
             )
 
         return calculated_losses
+

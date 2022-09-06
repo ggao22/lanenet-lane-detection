@@ -10,14 +10,17 @@ LaneNet model post process
 """
 import os.path as ops
 import math
+import time
 
 import cv2
 import numpy as np
 import loguru
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
+from local_utils.log_util import init_logger
 
 LOG = loguru.logger
+TEST_LOG = init_logger.get_logger(log_file_name_prefix='lanenet_test')
 
 
 def _morphological_process(image, kernel_size=5):
@@ -403,6 +406,8 @@ class LaneNetPostProcessor(object):
         :param data_source:
         :return:
         """
+        T_postprocess_start = time.time()
+
         # convert binary_seg_result
         binary_seg_result = np.array(binary_seg_result * 255, dtype=np.uint8)
 
@@ -418,11 +423,17 @@ class LaneNetPostProcessor(object):
                 idx = np.where(labels == index)
                 morphological_ret[idx] = 0
 
+        T_pre_clutering_treatment = time.time()
+        LOG.info('*** Pre-clustering Treatment cost time: {:.5f}s'.format(T_pre_clutering_treatment-T_postprocess_start))
+
         # apply embedding features cluster
         mask_image, lane_coords = self._cluster.apply_lane_feats_cluster(
             binary_seg_result=morphological_ret,
             instance_seg_result=instance_seg_result
         )
+
+        T_clustering = time.time()
+        LOG.info('*** Clustering cost time: {:.5f}s'.format(T_clustering-T_pre_clutering_treatment))
 
         if mask_image is None:
             return None
@@ -457,5 +468,8 @@ class LaneNetPostProcessor(object):
                 final_single_lane_pts.append([pts[0],pts[1]])
                 
             full_lane_pts.append(np.array(final_single_lane_pts))
+
+        T_lane_fit = time.time()
+        LOG.info('*** Lane fit cost time: {:.5f}s'.format(T_lane_fit-T_clustering))
 
         return full_lane_pts

@@ -8,12 +8,16 @@
 """
 Implement LaneNet Model
 """
+import time
+
 import tensorflow as tf
 
 from lanenet_model import lanenet_back_end
 from lanenet_model import lanenet_front_end
 from semantic_segmentation_zoo import cnn_basenet
+from local_utils.log_util import init_logger
 
+LOG = init_logger.get_logger(log_file_name_prefix='lanenet_test')
 
 class LaneNet(cnn_basenet.CNNBaseModel):
     """
@@ -44,11 +48,17 @@ class LaneNet(cnn_basenet.CNNBaseModel):
         """
         with tf.variable_scope(name_or_scope=name, reuse=reuse):
             # first extract image features
+
+            T_seg_start = time.time()
+
             extract_feats_result = self._frontend.build_model(
                 input_tensor=input_tensor,
                 name='{:s}_frontend'.format(self._net_flag),
                 reuse=reuse
             )
+
+            T_frontend_built = time.time()
+            LOG.info('*** Model Frontend build cost time: {:.5f}s'.format(T_frontend_built-T_seg_start))
 
             # second apply backend process
             binary_seg_prediction, instance_seg_prediction = self._backend.inference(
@@ -57,6 +67,9 @@ class LaneNet(cnn_basenet.CNNBaseModel):
                 name='{:s}_backend'.format(self._net_flag),
                 reuse=reuse
             )
+
+            T_backend_built = time.time()
+            LOG.info('*** Model Backend build cost time: {:.5f}s'.format(T_backend_built-T_frontend_built))
 
         return binary_seg_prediction, instance_seg_prediction
 

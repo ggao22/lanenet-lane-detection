@@ -234,6 +234,10 @@ class _LaneNetCluster(object):
         T_pre_db = time.time()
         LOG.info('*** *** Pre-DB treament cost time: {:.5f}s'.format(T_pre_db-T_db_start))
 
+        import sys
+        np.set_printoptions(threshold=sys.maxsize)
+        print(get_lane_embedding_feats_result['lane_embedding_feats'])
+
         # dbscan cluster
         dbscan_cluster_result = self._embedding_feats_dbscan_cluster(
             embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']

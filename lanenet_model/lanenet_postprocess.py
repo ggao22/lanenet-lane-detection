@@ -209,7 +209,8 @@ class _LaneNetCluster(object):
 
         import sys
         np.set_printoptions(threshold=sys.maxsize)
-        print(idx.shape)
+        print(instance_seg_ret)
+        print(np.array(idx).shape)
         print(idx)
         print(lane_embedding_feats.shape)
         print(lane_embedding_feats)

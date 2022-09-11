@@ -1,0 +1,7 @@
+2022-08-04T17:20:29.056044-0500 INFO Start reading image and preprocessing
+2022-08-04T17:20:29.133958-0500 INFO Image load complete, cost time: 0.07649s
+2022-08-04T17:20:50.899402-0500 INFO Single image inference cost time: 12.30644s
+2022-08-04T17:20:51.024568-0500 INFO Model have fitted 1 lanes
+2022-08-04T17:20:51.026913-0500 INFO Fitted 2-order lane 1 curve param: [-3.43846148e-15  1.11757562e-11 -1.58295022e-08  1.27623318e-05
+ -6.40597675e-03  2.04985989e+00 -4.08342765e+02  4.62928286e+04
+ -2.28567656e+06]

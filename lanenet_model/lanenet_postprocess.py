@@ -207,6 +207,15 @@ class _LaneNetCluster(object):
         lane_embedding_feats = instance_seg_ret[idx]
         lane_coordinate = np.vstack((idx[1], idx[0])).transpose()
 
+        import sys
+        np.set_printoptions(threshold=sys.maxsize)
+        print(idx.shape)
+        print(idx)
+        print(lane_embedding_feats.shape)
+        print(lane_embedding_feats)
+        print(lane_coordinate.shape)
+        print(lane_coordinate)
+
         assert lane_embedding_feats.shape[0] == lane_coordinate.shape[0]
 
         ret = {
@@ -233,10 +242,6 @@ class _LaneNetCluster(object):
 
         T_pre_db = time.time()
         LOG.info('*** *** Pre-DB treament cost time: {:.5f}s'.format(T_pre_db-T_db_start))
-
-        import sys
-        np.set_printoptions(threshold=sys.maxsize)
-        print(get_lane_embedding_feats_result['lane_embedding_feats'])
 
         # dbscan cluster
         dbscan_cluster_result = self._embedding_feats_dbscan_cluster(

@@ -1,3 +1,0 @@
-2022-07-26T13:11:22.992368-0500 INFO Start reading image and preprocessing
-2022-07-26T13:11:23.058727-0500 INFO Image load complete, cost time: 0.06504s
-2022-07-26T13:11:46.792761-0500 INFO Single image inference cost time: 14.79996s

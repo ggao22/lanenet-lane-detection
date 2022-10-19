@@ -127,6 +127,7 @@ def test_lanenet(image_path, weights_path, with_lane_fit=True):
     t_cost /= loop_times
     LOG.info('Single image inference cost time: {:.5f}s'.format(t_cost))
 
+    print(type(instance_seg_image))
     postprocess_result = postprocessor.postprocess(
         binary_seg_result=binary_seg_image[0],
         instance_seg_result=instance_seg_image[0],
@@ -153,7 +154,7 @@ def test_lanenet(image_path, weights_path, with_lane_fit=True):
     plt.imshow(embedding_image[:, :, (2, 1, 0)])
     plt.figure('binary_image')
     plt.imshow(binary_seg_image[0] * 255, cmap='gray')
-    plt.show()
+    #plt.show()
 
     sess.close()
 

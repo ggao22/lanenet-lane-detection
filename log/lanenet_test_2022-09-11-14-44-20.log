@@ -1,5 +1,0 @@
-2022-09-11T14:44:21.777809-0500 INFO Start reading image and preprocessing
-2022-09-11T14:44:21.875644-0500 INFO Image load complete, cost time: 0.09087s
-2022-09-11T14:44:28.907602-0500 INFO *** Model Frontend build cost time: 6.92546s
-2022-09-11T14:44:28.975325-0500 INFO *** Model Backend build cost time: 0.06772s
-2022-09-11T14:45:15.888711-0500 INFO Single image inference cost time: 33.11312s

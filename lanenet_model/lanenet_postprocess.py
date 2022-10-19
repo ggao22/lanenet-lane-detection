@@ -209,13 +209,6 @@ class _LaneNetCluster(object):
 
         import sys
         np.set_printoptions(threshold=sys.maxsize)
-        print(instance_seg_ret)
-        print(np.array(idx).shape)
-        print(idx)
-        print(lane_embedding_feats.shape)
-        print(lane_embedding_feats)
-        print(lane_coordinate.shape)
-        print(lane_coordinate)
 
         assert lane_embedding_feats.shape[0] == lane_coordinate.shape[0]
 

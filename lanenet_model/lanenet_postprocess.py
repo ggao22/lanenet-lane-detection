@@ -242,28 +242,31 @@ class _LaneNetCluster(object):
             embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
         )
 
-        T_db = time.time()
-        LOG.info('*** *** DBSCAN cost time: {:.5f}s'.format(T_db-T_pre_db))
+        # T_db = time.time()
+        # LOG.info('*** *** DBSCAN cost time: {:.5f}s'.format(T_db-T_pre_db))
 
-        mask = np.zeros(shape=[binary_seg_result.shape[0], binary_seg_result.shape[1], 3], dtype=np.uint8)
-        db_labels = dbscan_cluster_result['db_labels']
-        unique_labels = dbscan_cluster_result['unique_labels']
-        coord = get_lane_embedding_feats_result['lane_coordinates']
+        # mask = np.zeros(shape=[binary_seg_result.shape[0], binary_seg_result.shape[1], 3], dtype=np.uint8)
+        # db_labels = dbscan_cluster_result['db_labels']
+        # unique_labels = dbscan_cluster_result['unique_labels']
+        # coord = get_lane_embedding_feats_result['lane_coordinates']
 
-        if db_labels is None:
-            return None, None
+        # if db_labels is None:
+        #     return None, None
 
-        lane_coords = []
-        for index, label in enumerate(unique_labels.tolist()):
-            if label == -1:
-                continue
-            idx = np.where(db_labels == label)
-            pix_coord_idx = tuple((coord[idx][:, 1], coord[idx][:, 0]))
-            mask[pix_coord_idx] = self._color_map[index]
-            lane_coords.append(coord[idx])
+        # lane_coords = []
+        # for index, label in enumerate(unique_labels.tolist()):
+        #     if label == -1:
+        #         continue
+        #     idx = np.where(db_labels == label)
+        #     pix_coord_idx = tuple((coord[idx][:, 1], coord[idx][:, 0]))
+        #     mask[pix_coord_idx] = self._color_map[index]
+        #     lane_coords.append(coord[idx])
         
-        T_db_post = time.time()
-        LOG.info('*** *** Post-db treatment cost time: {:.5f}s'.format(T_db_post-T_db))
+        # T_db_post = time.time()
+        # LOG.info('*** *** Post-db treatment cost time: {:.5f}s'.format(T_db_post-T_db))
+
+        
+
 
         return mask, lane_coords
 
@@ -349,60 +352,66 @@ class LaneNetPostProcessor(object):
             instance_seg_result=instance_seg_result
         )
 
-        if mask_image is None:
-            return {
-                'mask_image': None,
-                'fit_params': None,
-                'source_image': None,
-            }
-        if not with_lane_fit:
-            tmp_mask = cv2.resize(
-                mask_image,
-                dsize=(source_image.shape[1], source_image.shape[0]),
-                interpolation=cv2.INTER_NEAREST
-            )
-            source_image = cv2.addWeighted(source_image, 0.6, tmp_mask, 0.4, 0.0, dst=source_image)
-            return {
-                'mask_image': mask_image,
-                'fit_params': None,
-                'source_image': source_image,
-            }
+        # if mask_image is None:
+        #     return {
+        #         'mask_image': None,
+        #         'fit_params': None,
+        #         'source_image': None,
+        #     }
+        # if not with_lane_fit:
+        #     tmp_mask = cv2.resize(
+        #         mask_image,
+        #         dsize=(source_image.shape[1], source_image.shape[0]),
+        #         interpolation=cv2.INTER_NEAREST
+        #     )
+        #     source_image = cv2.addWeighted(source_image, 0.6, tmp_mask, 0.4, 0.0, dst=source_image)
+        #     return {
+        #         'mask_image': mask_image,
+        #         'fit_params': None,
+        #         'source_image': source_image,
+        #     }
 
 
-        source_image_width = source_image.shape[1]
-        source_image_height = source_image.shape[0]
+        # source_image_width = source_image.shape[1]
+        # source_image_height = source_image.shape[0]
 
-        fitted_lane_coords = []
-        fit_params = []
-        for lane in lane_coords:
-            coord_x = np.int_(lane[:,0] * source_image_width / 512)
-            coord_y = np.int_(lane[:,1] * source_image_height / 256)
+        # fitted_lane_coords = []
+        # fit_params = []
+        # for lane in lane_coords:
+        #     coord_x = np.int_(lane[:,0] * source_image_width / 512)
+        #     coord_y = np.int_(lane[:,1] * source_image_height / 256)
             
-            fit_param = np.polyfit(coord_y, coord_x,deg=8)
-            fit_params.append(fit_param)
+        #     fit_param = np.polyfit(coord_y, coord_x,deg=8)
+        #     fit_params.append(fit_param)
             
-            spl = np.poly1d(fit_param)
-            dy = np.linspace(min(coord_y), max(coord_y), 50)
-            fitted_lane_coords.append(np.dstack((np.int_(spl(dy)), np.int_(dy))).reshape(len(dy),2))
+        #     spl = np.poly1d(fit_param)
+        #     dy = np.linspace(min(coord_y), max(coord_y), 50)
+        #     fitted_lane_coords.append(np.dstack((np.int_(spl(dy)), np.int_(dy))).reshape(len(dy),2))
 
-        full_lane_pts = []
-        for i in range(len(fitted_lane_coords)):
-            final_single_lane_pts = []
-            for pts in fitted_lane_coords[i]:
-                if pts[0] > source_image_width or pts[0] < 10 or \
-                        pts[1] > source_image_height or pts[1] < 0:
-                    continue
-                lane_color = self._color_map[i].tolist()
-                cv2.circle(source_image, (pts[0],
-                                          pts[1]), 5, lane_color, -1)
+        # full_lane_pts = []
+        # for i in range(len(fitted_lane_coords)):
+        #     final_single_lane_pts = []
+        #     for pts in fitted_lane_coords[i]:
+        #         if pts[0] > source_image_width or pts[0] < 10 or \
+        #                 pts[1] > source_image_height or pts[1] < 0:
+        #             continue
+        #         lane_color = self._color_map[i].tolist()
+        #         cv2.circle(source_image, (pts[0],
+        #                                   pts[1]), 5, lane_color, -1)
 
-                final_single_lane_pts.append([pts[0],pts[1]])
+        #         final_single_lane_pts.append([pts[0],pts[1]])
                 
-            full_lane_pts.append(np.array(final_single_lane_pts))
+        #     full_lane_pts.append(np.array(final_single_lane_pts))
+
+        # ret = {
+        #     'mask_image': mask_image,
+        #     'fit_params': fit_params,
+        #     'source_image': source_image,
+        # }
 
         ret = {
             'mask_image': mask_image,
-            'fit_params': fit_params,
+            'fit_params': None,
             'source_image': source_image,
         }
 

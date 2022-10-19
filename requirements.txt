@@ -1,4 +1,5 @@
 loguru
+scikit-learn
 tqdm
 matplotlib
 opencv_contrib_python

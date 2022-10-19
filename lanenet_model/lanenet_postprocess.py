@@ -242,31 +242,28 @@ class _LaneNetCluster(object):
             embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
         )
 
-        # T_db = time.time()
-        # LOG.info('*** *** DBSCAN cost time: {:.5f}s'.format(T_db-T_pre_db))
+        T_db = time.time()
+        LOG.info('*** *** DBSCAN cost time: {:.5f}s'.format(T_db-T_pre_db))
 
-        # mask = np.zeros(shape=[binary_seg_result.shape[0], binary_seg_result.shape[1], 3], dtype=np.uint8)
-        # db_labels = dbscan_cluster_result['db_labels']
-        # unique_labels = dbscan_cluster_result['unique_labels']
-        # coord = get_lane_embedding_feats_result['lane_coordinates']
+        mask = np.zeros(shape=[binary_seg_result.shape[0], binary_seg_result.shape[1], 3], dtype=np.uint8)
+        db_labels = dbscan_cluster_result['db_labels']
+        unique_labels = dbscan_cluster_result['unique_labels']
+        coord = get_lane_embedding_feats_result['lane_coordinates']
 
-        # if db_labels is None:
-        #     return None, None
+        if db_labels is None:
+            return None, None
 
-        # lane_coords = []
-        # for index, label in enumerate(unique_labels.tolist()):
-        #     if label == -1:
-        #         continue
-        #     idx = np.where(db_labels == label)
-        #     pix_coord_idx = tuple((coord[idx][:, 1], coord[idx][:, 0]))
-        #     mask[pix_coord_idx] = self._color_map[index]
-        #     lane_coords.append(coord[idx])
+        lane_coords = []
+        for index, label in enumerate(unique_labels.tolist()):
+            if label == -1:
+                continue
+            idx = np.where(db_labels == label)
+            pix_coord_idx = tuple((coord[idx][:, 1], coord[idx][:, 0]))
+            mask[pix_coord_idx] = self._color_map[index]
+            lane_coords.append(coord[idx])
         
-        # T_db_post = time.time()
-        # LOG.info('*** *** Post-db treatment cost time: {:.5f}s'.format(T_db_post-T_db))
-
-        
-
+        T_db_post = time.time()
+        LOG.info('*** *** Post-db treatment cost time: {:.5f}s'.format(T_db_post-T_db))
 
         return mask, lane_coords
 

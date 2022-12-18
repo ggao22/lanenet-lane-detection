@@ -1,14 +1,14 @@
 AUG:
     RESIZE_METHOD: 'stepscaling' # choice unpadding rangescaling and stepscaling
-    FIX_RESIZE_SIZE: [1280, 720] # (width, height), for unpadding
+    FIX_RESIZE_SIZE: [256, 128] # (width, height), for unpadding
     INF_RESIZE_VALUE: 500  # for rangescaling
     MAX_RESIZE_VALUE: 600  # for rangescaling
     MIN_RESIZE_VALUE: 400  # for rangescaling
     MAX_SCALE_FACTOR: 2.0  # for stepscaling
     MIN_SCALE_FACTOR: 0.75  # for stepscaling
     SCALE_STEP_SIZE: 0.25  # for stepscaling
-    TRAIN_CROP_SIZE: [512, 256]  # crop size for training
-    EVAL_CROP_SIZE: [512, 256]  # crop size for evaluating
+    TRAIN_CROP_SIZE: [256, 128]  # crop size for training
+    EVAL_CROP_SIZE: [256, 128]  # crop size for evaluating
     CROP_PAD_SIZE: 32
     MIRROR: True
     FLIP: False
@@ -24,12 +24,12 @@ AUG:
         CONTRAST_JITTER_RATIO: 0.5
         SATURATION_JITTER_RATIO: 0.5
 DATASET:
-    DATA_DIR: '/home/george/minicity_training_data/'
+    DATA_DIR: '/home/yvxaiver/minicity_training_data/'
     IMAGE_TYPE: 'rgb'  # choice rgb or rgba
     NUM_CLASSES: 2
-    TEST_FILE_LIST: '/home/george/minicity_training_data/test.txt'
-    TRAIN_FILE_LIST: '/home/george/minicity_training_data/train.txt'
-    VAL_FILE_LIST: '/home/george/minicity_training_data/val.txt'
+    TEST_FILE_LIST: '/home/yvxaiver/minicity_training_data/test.txt'
+    TRAIN_FILE_LIST: '/home/yvxaiver/minicity_training_data/train.txt'
+    VAL_FILE_LIST: '/home/yvxaiver/minicity_training_data/val.txt'
     IGNORE_INDEX: 255
     PADDING_VALUE: [127.5, 127.5, 127.5]
     MEAN_VALUE: [0.5, 0.5, 0.5]
@@ -88,9 +88,9 @@ GPU:
     GPU_MEMORY_FRACTION: 0.9
     TF_ALLOW_GROWTH: True
 POSTPROCESS:
-    MIN_AREA_THRESHOLD: 60
-    DBSCAN_EPS: 0.128
-    DBSCAN_MIN_SAMPLES: 120
+    MIN_AREA_THRESHOLD: 40
+    DBSCAN_EPS: 0.25
+    DBSCAN_MIN_SAMPLES: 70
 LOG:
     SAVE_DIR: './log'
     LEVEL: INFO

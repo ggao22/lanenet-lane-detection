@@ -8,6 +8,9 @@
 """
 LaneNet model post process
 """
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
+
 import os.path as ops
 import math
 import time
@@ -15,8 +18,6 @@ import time
 import cv2
 import numpy as np
 import loguru
-from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import StandardScaler
 from local_utils.log_util import init_logger
 
 LOG = loguru.logger
@@ -328,6 +329,9 @@ class LaneNetPostProcessor(object):
         :param data_source:
         :return:
         """
+
+        print('\n\n', type(binary_seg_result), type(instance_seg_result), '\n\n')
+
         # convert binary_seg_result
         binary_seg_result = np.array(binary_seg_result * 255, dtype=np.uint8)
 
@@ -426,6 +430,9 @@ class LaneNetPostProcessor(object):
         :param data_source:
         :return:
         """
+
+        print('\n\n', type(binary_seg_result), type(instance_seg_result), '\n\n')
+
         T_postprocess_start = time.time()
 
         # convert binary_seg_result

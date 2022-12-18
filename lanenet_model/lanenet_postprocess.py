@@ -15,6 +15,8 @@ import time
 import cv2
 import numpy as np
 import loguru
+import igraph
+import networkx as nx
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 from local_utils.log_util import init_logger
@@ -165,9 +167,14 @@ class _LaneNetCluster(object):
         :param embedding_image_feats:
         :return:
         """
-        db = DBSCAN(eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
+
+        db = DBSCAN(metric='precomputed', eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
         try:
             features = StandardScaler().fit_transform(embedding_image_feats)
+            G = nx.from_numpy_matrix(features)
+            edges = zip(*nx.to_edgelist(G))
+            G1 = igraph.Graph(len(G), zip(*edges[:2]))
+            D = 1 - np.array(G1.similarity_jaccard(loops=False))
             db.fit(features)
         except Exception as err:
             LOG.error(err)

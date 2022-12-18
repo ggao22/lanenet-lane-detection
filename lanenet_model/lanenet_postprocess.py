@@ -17,7 +17,8 @@ import numpy as np
 import loguru
 import igraph
 import networkx as nx
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, OPTICS
+from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 from local_utils.log_util import init_logger
 
@@ -168,14 +169,14 @@ class _LaneNetCluster(object):
         :return:
         """
 
-        db = DBSCAN(metric='precomputed', eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
+        db = DBSCAN(algorithm='ball_tree', leaf_size=4, metric='precomputed', eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
+        db = OPTICS(min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES, max_eps=self._cfg.POSTPROCESS.DBSCAN_EPS, )
         try:
             features = StandardScaler().fit_transform(embedding_image_feats)
-            G = nx.from_numpy_matrix(features)
-            edges = zip(*nx.to_edgelist(G))
-            G1 = igraph.Graph(len(G), zip(*edges[:2]))
-            D = 1 - np.array(G1.similarity_jaccard(loops=False))
-            db.fit(features)
+            nn = NearestNeighbors(radius=self._cfg.POSTPROCESS.DBSCAN_EPS)
+            G = nn.radius_neighbors_graph(features, mode='distance')
+            db.fit(G)
+            #db.fit(features)
         except Exception as err:
             LOG.error(err)
             ret = {
@@ -186,6 +187,7 @@ class _LaneNetCluster(object):
                 'cluster_center': None
             }
             return ret
+
         db_labels = db.labels_
         unique_labels = np.unique(db_labels)
 

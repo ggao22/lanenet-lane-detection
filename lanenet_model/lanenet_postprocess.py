@@ -17,7 +17,7 @@ import numpy as np
 import loguru
 import igraph
 import networkx as nx
-from sklearn.cluster import DBSCAN, OPTICS
+from sklearn.cluster import DBSCAN, KMeans
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 from local_utils.log_util import init_logger
@@ -169,14 +169,10 @@ class _LaneNetCluster(object):
         :return:
         """
 
-        db = DBSCAN(algorithm='ball_tree', leaf_size=4, metric='precomputed', eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
-        db = OPTICS(min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES, max_eps=self._cfg.POSTPROCESS.DBSCAN_EPS, )
+        db = DBSCAN(eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
         try:
             features = StandardScaler().fit_transform(embedding_image_feats)
-            nn = NearestNeighbors(radius=self._cfg.POSTPROCESS.DBSCAN_EPS)
-            G = nn.radius_neighbors_graph(features, mode='distance')
-            db.fit(G)
-            #db.fit(features)
+            db.fit(features)
         except Exception as err:
             LOG.error(err)
             ret = {
@@ -187,7 +183,6 @@ class _LaneNetCluster(object):
                 'cluster_center': None
             }
             return ret
-
         db_labels = db.labels_
         unique_labels = np.unique(db_labels)
 
@@ -197,12 +192,49 @@ class _LaneNetCluster(object):
         ret = {
             'origin_features': features,
             'cluster_nums': num_clusters,
-            'db_labels': db_labels,
+            'labels': db_labels,
             'unique_labels': unique_labels,
             'cluster_center': cluster_centers
         }
 
         return ret
+
+    
+    def _embedding_feats_kmean_cluster(self, embedding_image_feats, k):
+        """
+        kmean cluster
+        :param embedding_image_feats:
+        :return:
+        """
+
+        km = KMeans(n_clusters=k)
+        try:
+            features = StandardScaler().fit_transform(embedding_image_feats)
+            km.fit(features)
+        except Exception as err:
+            LOG.error(err)
+            ret = {
+                'origin_features': None,
+                'cluster_nums': 0,
+                'db_labels': None,
+                'unique_labels': None,
+                'cluster_center': None
+            }
+            return ret
+        km_labels = km.labels_
+        unique_labels = np.unique(km_labels)
+
+        num_clusters = len(unique_labels)
+
+        ret = {
+            'origin_features': features,
+            'cluster_nums': num_clusters,
+            'labels': km_labels,
+            'unique_labels': unique_labels,
+        }
+
+        return ret
+
 
     @staticmethod
     def _get_lane_embedding_feats(binary_seg_ret, instance_seg_ret):
@@ -235,7 +267,7 @@ class _LaneNetCluster(object):
 
         return ret
 
-    def apply_lane_feats_cluster(self, binary_seg_result, instance_seg_result):
+    def apply_lane_feats_cluster(self, binary_seg_result, instance_seg_result, serial_n):
         """
 
         :param binary_seg_result:
@@ -250,36 +282,42 @@ class _LaneNetCluster(object):
             instance_seg_ret=instance_seg_result
         )
 
-        T_pre_db = time.time()
-        LOG.info('*** *** Pre-DB treament cost time: {:.5f}s'.format(T_pre_db-T_db_start))
+        T_pre_clus = time.time()
+        LOG.info('*** *** Pre-Clustering treatment cost time: {:.5f}s'.format(T_pre_db-T_db_start))
 
-        # dbscan cluster
-        dbscan_cluster_result = self._embedding_feats_dbscan_cluster(
-            embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
-        )
+        if serial_n % 10 == 0:
+            # dbscan cluster
+            dbscan_cluster_result = self._embedding_feats_dbscan_cluster(
+                embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
+            )
+        else:
+            # k-mean cluster
+            dbscan_cluster_result = self._embedding_feats_kmean_cluster(
+                embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
+            )
 
-        T_db = time.time()
-        LOG.info('*** *** DBSCAN cost time: {:.5f}s'.format(T_db-T_pre_db))
+        T_clus = time.time()
+        LOG.info('*** *** Clustering cost time: {:.5f}s'.format(T_clus-T_pre_clus))
 
         mask = np.zeros(shape=[binary_seg_result.shape[0], binary_seg_result.shape[1], 3], dtype=np.uint8)
-        db_labels = dbscan_cluster_result['db_labels']
+        labels = dbscan_cluster_result['labels']
         unique_labels = dbscan_cluster_result['unique_labels']
         coord = get_lane_embedding_feats_result['lane_coordinates']
 
-        if db_labels is None:
+        if labels is None:
             return None, None
 
         lane_coords = []
         for index, label in enumerate(unique_labels.tolist()):
             if label == -1:
                 continue
-            idx = np.where(db_labels == label)
+            idx = np.where(labels == label)
             pix_coord_idx = tuple((coord[idx][:, 1], coord[idx][:, 0]))
             mask[pix_coord_idx] = self._color_map[index]
             lane_coords.append(coord[idx])
         
-        T_db_post = time.time()
-        LOG.info('*** *** Post-db treatment cost time: {:.5f}s'.format(T_db_post-T_db))
+        T_clus_post = time.time()
+        LOG.info('*** *** Post-Clustering treatment cost time: {:.5f}s'.format(T_clus_post-T_clus))
 
         return mask, lane_coords
 
@@ -431,7 +469,7 @@ class LaneNetPostProcessor(object):
         return ret
 
 
-    def postprocess_lanepts(self, binary_seg_result, instance_seg_result=None,
+    def postprocess_lanepts(self, binary_seg_result, serial_n, instance_seg_result=None,
                     min_area_threshold=100, source_image=None, data_source='tusimple'):
         """
 
@@ -466,6 +504,7 @@ class LaneNetPostProcessor(object):
         mask_image, lane_coords = self._cluster.apply_lane_feats_cluster(
             binary_seg_result=morphological_ret,
             instance_seg_result=instance_seg_result
+            serial_n=serial_n
         )
 
         T_clustering = time.time()

@@ -208,18 +208,24 @@ class _LaneNetCluster(object):
         :return:
         """
         print("*** Processing with Kmean ***")
+
+        ret = {
+            'origin_features': None,
+            'cluster_nums': 0,
+            'labels': None,
+            'unique_labels': None,
+        }
+        
+        if k == 0: return ret
+
         km = KMeans(n_clusters=k)
+        
         try:
             features = StandardScaler().fit_transform(embedding_image_feats)
             km.fit(features)
         except Exception as err:
             LOG.error(err)
-            ret = {
-                'origin_features': None,
-                'cluster_nums': 0,
-                'labels': None,
-                'unique_labels': None,
-            }
+            
             return ret
         km_labels = km.labels_
         unique_labels = np.unique(km_labels)
@@ -275,14 +281,14 @@ class _LaneNetCluster(object):
         T_pre_clus = time.time()
         LOG.info('*** *** Pre-Clustering treatment cost time: {:.5f}s'.format(T_pre_clus-T_db_start))
 
-        if serial_n % 10 == 0:
+        if serial_n % 5 == 0:
             # dbscan cluster
-            dbscan_cluster_result = self._embedding_feats_dbscan_cluster(
+            cluster_result = self._embedding_feats_dbscan_cluster(
                 embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
             )
         else:
             # k-mean cluster
-            dbscan_cluster_result = self._embedding_feats_kmean_cluster(
+            cluster_result = self._embedding_feats_kmean_cluster(
                 embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats'], k=k
             )
 
@@ -290,8 +296,8 @@ class _LaneNetCluster(object):
         LOG.info('*** *** Clustering cost time: {:.5f}s'.format(T_clus-T_pre_clus))
 
         mask = np.zeros(shape=[binary_seg_result.shape[0], binary_seg_result.shape[1], 3], dtype=np.uint8)
-        labels = dbscan_cluster_result['labels']
-        unique_labels = dbscan_cluster_result['unique_labels']
+        labels = cluster_result['labels']
+        unique_labels = cluster_result['unique_labels']
         coord = get_lane_embedding_feats_result['lane_coordinates']
 
         if labels is None:

@@ -190,6 +190,8 @@ class _LaneNetCluster(object):
         num_clusters = len(unique_labels)
         cluster_centers = db.components_
 
+        print(num_clusters)
+
         ret = {
             'origin_features': features,
             'cluster_nums': num_clusters,

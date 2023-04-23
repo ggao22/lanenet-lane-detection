@@ -168,6 +168,7 @@ class _LaneNetCluster(object):
         :param embedding_image_feats:
         :return:
         """
+        print("*** Processing with DBSCAN ***")
 
         db = DBSCAN(eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
         try:
@@ -206,7 +207,7 @@ class _LaneNetCluster(object):
         :param embedding_image_feats:
         :return:
         """
-
+        print("*** Processing with Kmean ***")
         km = KMeans(n_clusters=k)
         try:
             features = StandardScaler().fit_transform(embedding_image_feats)
@@ -216,9 +217,8 @@ class _LaneNetCluster(object):
             ret = {
                 'origin_features': None,
                 'cluster_nums': 0,
-                'db_labels': None,
+                'labels': None,
                 'unique_labels': None,
-                'cluster_center': None
             }
             return ret
         km_labels = km.labels_

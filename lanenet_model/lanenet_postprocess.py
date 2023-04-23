@@ -279,7 +279,7 @@ class _LaneNetCluster(object):
         T_pre_clus = time.time()
         LOG.info('*** *** Pre-Clustering treatment cost time: {:.5f}s'.format(T_pre_clus-T_db_start))
 
-        if serial_n % 2 == 0:
+        if serial_n % 2 == 1:
             # dbscan cluster
             cluster_result = self._embedding_feats_dbscan_cluster(
                 embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']

@@ -302,7 +302,7 @@ class _LaneNetCluster(object):
         k = cluster_result['cluster_nums']
 
         if labels is None:
-            return None, None, None
+            return None, None, k
 
         lane_coords = []
         for index, label in enumerate(unique_labels.tolist()):

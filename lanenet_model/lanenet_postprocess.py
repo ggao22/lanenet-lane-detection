@@ -208,6 +208,7 @@ class _LaneNetCluster(object):
         :return:
         """
         print("*** Processing with Kmean ***")
+        print('k = '+str(k))
 
         ret = {
             'origin_features': None,
@@ -281,7 +282,6 @@ class _LaneNetCluster(object):
 
         print(serial_n)
         if serial_n % 5 == 0:
-            print("db")
             # dbscan cluster
             cluster_result = self._embedding_feats_dbscan_cluster(
                 embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
@@ -509,7 +509,7 @@ class LaneNetPostProcessor(object):
         LOG.info('*** Clustering cost time: {:.5f}s'.format(T_clustering-T_pre_clutering_treatment))
 
         if mask_image is None:
-            return None
+            return None, None
 
         source_image_width = source_image.shape[1]
         source_image_height = source_image.shape[0]

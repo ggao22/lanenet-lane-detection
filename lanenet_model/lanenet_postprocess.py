@@ -279,6 +279,7 @@ class _LaneNetCluster(object):
         T_pre_clus = time.time()
         LOG.info('*** *** Pre-Clustering treatment cost time: {:.5f}s'.format(T_pre_clus-T_db_start))
 
+        print(serial_n)
         if serial_n % 5 == 0:
             print("db")
             # dbscan cluster

@@ -503,7 +503,7 @@ class LaneNetPostProcessor(object):
         # apply embedding features cluster
         mask_image, lane_coords = self._cluster.apply_lane_feats_cluster(
             binary_seg_result=morphological_ret,
-            instance_seg_result=instance_seg_result
+            instance_seg_result=instance_seg_result,
             serial_n=serial_n
         )
 

@@ -500,7 +500,7 @@ class LaneNetPostProcessor(object):
         LOG.info('*** Pre-clustering Treatment cost time: {:.5f}s'.format(T_pre_clutering_treatment-T_postprocess_start))
 
         # apply embedding features cluster
-        mask_image, lane_coords, k = self._cluster.apply_lane_feats_cluster(
+        mask_image, lane_coords, new_k = self._cluster.apply_lane_feats_cluster(
             binary_seg_result=morphological_ret,
             instance_seg_result=instance_seg_result,
             serial_n=serial_n,
@@ -511,7 +511,7 @@ class LaneNetPostProcessor(object):
         LOG.info('*** Clustering cost time: {:.5f}s'.format(T_clustering-T_pre_clutering_treatment))
 
         if mask_image is None:
-            return None, None
+            return None, new_k
 
         source_image_width = source_image.shape[1]
         source_image_height = source_image.shape[0]
@@ -547,4 +547,4 @@ class LaneNetPostProcessor(object):
         T_lane_fit = time.time()
         LOG.info('*** Lane fit cost time: {:.5f}s'.format(T_lane_fit-T_clustering))
 
-        return full_lane_pts, k
+        return full_lane_pts, new_k

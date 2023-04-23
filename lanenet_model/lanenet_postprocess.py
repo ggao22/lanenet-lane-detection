@@ -225,16 +225,14 @@ class _LaneNetCluster(object):
             km.fit(features)
         except Exception as err:
             LOG.error(err)
-            
             return ret
+        
         km_labels = km.labels_
         unique_labels = np.unique(km_labels)
 
-        num_clusters = len(unique_labels)
-
         ret = {
             'origin_features': features,
-            'cluster_nums': num_clusters,
+            'cluster_nums': k,
             'labels': km_labels,
             'unique_labels': unique_labels,
         }
@@ -299,6 +297,7 @@ class _LaneNetCluster(object):
         labels = cluster_result['labels']
         unique_labels = cluster_result['unique_labels']
         coord = get_lane_embedding_feats_result['lane_coordinates']
+        k = cluster_result['cluster_nums']
 
         if labels is None:
             return None, None
@@ -315,7 +314,7 @@ class _LaneNetCluster(object):
         T_clus_post = time.time()
         LOG.info('*** *** Post-Clustering treatment cost time: {:.5f}s'.format(T_clus_post-T_clus))
 
-        return mask, lane_coords
+        return mask, lane_coords, k
 
 
 class LaneNetPostProcessor(object):
@@ -497,7 +496,7 @@ class LaneNetPostProcessor(object):
         LOG.info('*** Pre-clustering Treatment cost time: {:.5f}s'.format(T_pre_clutering_treatment-T_postprocess_start))
 
         # apply embedding features cluster
-        mask_image, lane_coords = self._cluster.apply_lane_feats_cluster(
+        mask_image, lane_coords, k = self._cluster.apply_lane_feats_cluster(
             binary_seg_result=morphological_ret,
             instance_seg_result=instance_seg_result,
             serial_n=serial_n,
@@ -544,4 +543,4 @@ class LaneNetPostProcessor(object):
         T_lane_fit = time.time()
         LOG.info('*** Lane fit cost time: {:.5f}s'.format(T_lane_fit-T_clustering))
 
-        return full_lane_pts
+        return full_lane_pts, k

@@ -257,7 +257,7 @@ class _LaneNetCluster(object):
 
         return ret
 
-    def apply_lane_feats_cluster(self, binary_seg_result, instance_seg_result, serial_n):
+    def apply_lane_feats_cluster(self, binary_seg_result, instance_seg_result, serial_n, k):
         """
 
         :param binary_seg_result:
@@ -283,7 +283,7 @@ class _LaneNetCluster(object):
         else:
             # k-mean cluster
             dbscan_cluster_result = self._embedding_feats_kmean_cluster(
-                embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats']
+                embedding_image_feats=get_lane_embedding_feats_result['lane_embedding_feats'], k=k
             )
 
         T_clus = time.time()
@@ -459,7 +459,7 @@ class LaneNetPostProcessor(object):
         return ret
 
 
-    def postprocess_lanepts(self, binary_seg_result, serial_n, instance_seg_result=None,
+    def postprocess_lanepts(self, binary_seg_result, serial_n, k, instance_seg_result=None,
                     min_area_threshold=100, source_image=None, data_source='tusimple'):
         """
 
@@ -494,7 +494,8 @@ class LaneNetPostProcessor(object):
         mask_image, lane_coords = self._cluster.apply_lane_feats_cluster(
             binary_seg_result=morphological_ret,
             instance_seg_result=instance_seg_result,
-            serial_n=serial_n
+            serial_n=serial_n,
+            k=k
         )
 
         T_clustering = time.time()

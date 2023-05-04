@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 import loguru
 from sklearn.cluster import DBSCAN
+from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 from local_utils.log_util import init_logger
 
@@ -168,7 +169,9 @@ class _LaneNetCluster(object):
         db = DBSCAN(algorithm='ball_tree', leaf_size=4, metric='precomputed', eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
         try:
             features = StandardScaler().fit_transform(embedding_image_feats)
-            db.fit(features)
+            nn = NearestNeighbors(radius=self._cfg.POSTPROCESS.DBSCAN_EPS)
+            G = nn.radius_neighbors_graph(features, mode='distance')
+            db.fit(G)
         except Exception as err:
             LOG.error(err)
             ret = {

@@ -16,7 +16,6 @@ import cv2
 import numpy as np
 import loguru
 from sklearn.cluster import DBSCAN
-from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 from local_utils.log_util import init_logger
 
@@ -166,12 +165,10 @@ class _LaneNetCluster(object):
         :param embedding_image_feats:
         :return:
         """
-        db = DBSCAN(algorithm='ball_tree', leaf_size=4, metric='precomputed', eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
+        db = DBSCAN(algorithm='ball_tree', leaf_size=10, eps=self._cfg.POSTPROCESS.DBSCAN_EPS, min_samples=self._cfg.POSTPROCESS.DBSCAN_MIN_SAMPLES)
         try:
             features = StandardScaler().fit_transform(embedding_image_feats)
-            nn = NearestNeighbors(radius=self._cfg.POSTPROCESS.DBSCAN_EPS)
-            G = nn.radius_neighbors_graph(features, mode='distance')
-            db.fit(G)
+            db.fit(features)
         except Exception as err:
             LOG.error(err)
             ret = {
@@ -209,16 +206,6 @@ class _LaneNetCluster(object):
         idx = np.where(binary_seg_ret == 255)
         lane_embedding_feats = instance_seg_ret[idx]
         lane_coordinate = np.vstack((idx[1], idx[0])).transpose()
-
-        import sys
-        np.set_printoptions(threshold=sys.maxsize)
-        print(instance_seg_ret)
-        print(np.array(idx).shape)
-        print(idx)
-        print(lane_embedding_feats.shape)
-        print(lane_embedding_feats)
-        print(lane_coordinate.shape)
-        print(lane_coordinate)
 
         assert lane_embedding_feats.shape[0] == lane_coordinate.shape[0]
 
